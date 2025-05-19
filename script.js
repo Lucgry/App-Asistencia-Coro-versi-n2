@@ -186,13 +186,13 @@ form.addEventListener("submit", (e) => {
 
   const now = new Date();
 
-  if (!isWithinSchedule(now)) {
-    showMessage(
-      "El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.",
-      true
-    );
-    return;
-  }
+  //if (!isWithinSchedule(now)) {
+    //showMessage(
+      //"El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.",
+      //true
+    //);
+    //return;
+  //}
 
   if (hasAttendance(selectedName, formatDate(now))) {
     showMessage("Ya registraste tu asistencia hoy.", true);
