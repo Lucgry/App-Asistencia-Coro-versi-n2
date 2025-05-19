@@ -186,23 +186,23 @@ form.addEventListener("submit", (e) => {
 
   const now = new Date();
 
-  //if (!isWithinSchedule(now)) {
-    //showMessage(
-      //"El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.",
-      //true
-    //);
+  if (!isWithinSchedule(now)) {
+    showMessage(
+      "El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.",
+      true
+    );
     //return;
-  //}
+  }
 
   if (hasAttendance(selectedName, formatDate(now))) {
     showMessage("Ya registraste tu asistencia hoy.", true);
     return;
   }
 
-  //if (!navigator.geolocation) {
-    //showMessage("Geolocalización no soportada por el navegador.", true);
-    //return;
-  //}
+  if (!navigator.geolocation) {
+    showMessage("Geolocalización no soportada por el navegador.", true);
+    return;
+  }
 
   showMessage("Registrando asistencia...", false);
   form.querySelector("button[type=submit]").disabled = true;
