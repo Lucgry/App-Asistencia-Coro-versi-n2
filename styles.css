@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Raleway', sans-serif;
+  background: linear-gradient(180deg, #2f2f2f, #1c1c1c);
+  margin: 0;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+header {
+  width: 100%;
+  background-color: #174ea6; /* azul botón */
+  padding: 1rem 0;           /* menos padding lateral */
+  display: flex;
+  flex-direction: column;    /* vertical */
+  align-items: center;       /* centro horizontal */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  gap: 0.5rem;               /* espacio entre logo y título */
+}
+
+#logo {
+  height: 120px; /* tamaño más grande */
+  width: auto;
+}
+
+h1 {
+  margin: 0;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+}
+
+main {
+  flex: 0 0 auto;      /* Ajusta tamaño al contenido */
+  width: 100%;
+  max-width: 480px;
+  padding: 2rem;
+  background-color: #2f2f2f;
+  box-shadow: 0 0 15px rgba(0,0,0,0.7);
+  border-radius: 8px;
+  margin-top: 2rem;
+  height: auto;
+  min-height: 0;
+}
+
+.container h1 {
+  color: white;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.8rem;
+}
+
+#clock {
+  font-family: monospace;
+  font-size: 2.5rem;
+  text-align: center;
+  color: white;
+  background-color: #121212; /* gris muy oscuro */
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background-color: #444;
+  color: #eee;
+  font-size: 1rem;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.7);
+}
+
+select option {
+  background-color: #444;
+  color: #eee;
+}
+
+button {
+  margin-top: 1rem;
+  margin-bottom: 0;    /* sin margen extra abajo */
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  background-color: #174ea6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(23,78,166,0.6);
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0f3b81;
+}
+
+#message {
+  min-height: 2rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+main, .container, form {
+  overflow: visible; /* Permite que el desplegable sobresalga */
+}
+
+form {
+  padding-bottom: 3rem; /* Espacio extra debajo del botón */
+}
+
+select {
+  position: relative;
+  z-index: 2; /* Asegura que esté por encima de otros elementos */
+}
+
+select {
+  position: relative;
+  z-index: 1000;
+}
+
+select:focus {
+  outline: none;
+}
+
+/* ... todo tu CSS previo ... */
+
+#logo {
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.9));
+}
+
+header h1 {
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
+}
+
