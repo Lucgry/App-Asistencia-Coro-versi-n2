@@ -225,7 +225,7 @@ form.addEventListener("submit", (e) => {
       }
 
       // Enviar datos a Google Sheets
-      fetch("https://script.google.com/macros/s/AKfycbwsVQkwXwZtGf-oamQqDxJVlFZJTvoP3SqiXjwSBkId771JwvqM8Iw96qemQEGfVNIL/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEkYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec", {
         method: "POST",
         mode: "no-cors",
         headers: {
