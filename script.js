@@ -199,10 +199,10 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
-  if (!navigator.geolocation) {
-    showMessage("Geolocalización no soportada por el navegador.", true);
-    return;
-  }
+  //if (!navigator.geolocation) {
+    //showMessage("Geolocalización no soportada por el navegador.", true);
+    //return;
+  //}
 
   showMessage("Registrando asistencia...", false);
   form.querySelector("button[type=submit]").disabled = true;
