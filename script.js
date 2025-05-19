@@ -78,11 +78,20 @@ function updateClock() {
 }
 
 // Validar si fecha y hora están dentro del horario permitido
-// Reemplaza esta función en tu script.js
 function isWithinSchedule(date) {
-  return true; // Siempre permite registrar para pruebas
-}
+  const day = date.getDay(); // 0 = Domingo, 1 = Lunes ...
+  const hour = date.getHours();
+  const minute = date.getMinutes();
 
+  const isValidDay = day === 1 || day === 3 || day === 5; // Lunes, Miércoles, Viernes
+  if (!isValidDay) return false;
+
+  const timeInMinutes = hour * 60 + minute;
+  const startTime = 20 * 60 + 30; // 20:30
+  const endTime = 23 * 60 + 0; // 23:00
+
+  return timeInMinutes >= startTime && timeInMinutes <= endTime;
+}
 
 // Calcular distancia en metros entre dos coordenadas (Haversine)
 function getDistanceMeters(lat1, lng1, lat2, lng2) {
@@ -178,7 +187,10 @@ form.addEventListener("submit", (e) => {
   const now = new Date();
 
   if (!isWithinSchedule(now)) {
-    showMessage("El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.", true);
+    showMessage(
+      "El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.",
+      true
+    );
     return;
   }
 
@@ -192,48 +204,72 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
+  showMessage("Registrando asistencia...", false);
+  form.querySelector("button[type=submit]").disabled = true;
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      //const locCheck = validateLocation(position);
-      //if (!locCheck.valid) {
-        //showMessage(`Estás fuera de la ubicación permitida. Distancia: ${locCheck.distance} metros.`, true);
-        //return;
-      //}
+      const locCheck = validateLocation(position);
+      if (!locCheck.valid) {
+        form.querySelector("button[type=submit]").disabled = false;
+        showMessage(
+          `Estás fuera de la ubicación permitida. Distancia: ${locCheck.distance} metros.`,
+          true
+        );
+        return;
+      }
 
       const lateLimit = new Date(now);
       lateLimit.setHours(23, 15, 0, 0);
       const isLate = now > lateLimit;
 
+      // Guardar en localStorage
       saveAttendance(selectedName, formatDate(now), isLate);
 
       const yearMonth = formatYearMonth(now);
       const lateCount = countLateArrivals(selectedName, yearMonth);
 
-      if (isLate) {
-        showMessage(`Registro guardado. Llegás tarde. Total llegadas tarde en este mes: ${lateCount}.`);
-      } else {
-        showMessage("Registro guardado. ¡A tiempo!");
-      }
-
-      // Enviar datos a Google Sheets
-      fetch("https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEkYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nombre: selectedName,
-          fecha: now.toLocaleDateString("es-AR"),
-          hora: now.toLocaleTimeString("es-AR", { hour12: false }),
-          estado: isLate ? "Tarde" : "Presente",
-        }),
-      });
-
-      form.reset();
+      // Enviar datos a Google Sheets (tu URL acá)
+      fetch(
+        "https://script.google.com/macros/s/AKfycbwsVQkwXwZtGf-oamQqDxJVlFZJTvoP3SqiXjwSBkId771JwvqM8Iw96qemQEGfVNIL/exec",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nombre: selectedName,
+            fecha: now.toLocaleDateString("es-AR"),
+            hora: now.toLocaleTimeString("es-AR", { hour12: false }),
+            estado: isLate ? "Tarde" : "Presente",
+          }),
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          form.querySelector("button[type=submit]").disabled = false;
+          if (data.result === "OK") {
+            showMessage(
+              isLate
+                ? `Registro guardado. Llegás tarde. Total llegadas tarde en este mes: ${lateCount}.`
+                : "Registro guardado. ¡A tiempo!"
+            );
+            form.reset();
+          } else {
+            showMessage("Error en registro: " + (data.error || "Desconocido"), true);
+          }
+        })
+        .catch(() => {
+          form.querySelector("button[type=submit]").disabled = false;
+          showMessage("Error conectando con el servidor.", true);
+        });
     },
     (error) => {
-      showMessage("No se pudo obtener la ubicación. Asegurate de permitir el acceso.", true);
+      form.querySelector("button[type=submit]").disabled = false;
+      showMessage(
+        "No se pudo obtener la ubicación. Asegurate de permitir el acceso.",
+        true
+      );
     }
   );
 });
