@@ -224,6 +224,21 @@ form.addEventListener("submit", (e) => {
         showMessage("Registro guardado. ¡A tiempo!");
       }
 
+      // Enviar datos a Google Sheets
+      fetch("https://script.google.com/macros/s/AKfycbwsVQkwXwZtGf-oamQqDxJVlFZJTvoP3SqiXjwSBkId771JwvqM8Iw96qemQEGfVNIL/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: selectedName,
+          fecha: now.toLocaleDateString("es-AR"),
+          hora: now.toLocaleTimeString("es-AR", { hour12: false }),
+          estado: isLate ? "Tarde" : "Presente",
+        }),
+      });
+
       form.reset();
     },
     (error) => {
