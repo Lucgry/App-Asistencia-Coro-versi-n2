@@ -27,15 +27,17 @@ header {
 }
 
 #logo {
-  height: 120px; /* tamaño más grande */
+  max-height: 110px; /* tamaño ajustado para no quedar ni gigante ni pequeño */
   width: auto;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); /* sombra más pronunciada */
 }
 
 h1 {
-  margin: 0;
+  margin: 1rem 0 0 0; /* margen arriba para separar del header */
   font-weight: 700;
   color: white;
   text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7); /* sombra suave para el texto */
 }
 
 main {
