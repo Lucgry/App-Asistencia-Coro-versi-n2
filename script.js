@@ -194,11 +194,11 @@ form.addEventListener("submit", (e) => {
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      const locCheck = validateLocation(position);
-      if (!locCheck.valid) {
-        showMessage(`Estás fuera de la ubicación permitida. Distancia: ${locCheck.distance} metros.`, true);
-        return;
-      }
+      //const locCheck = validateLocation(position);
+      //if (!locCheck.valid) {
+        //showMessage(`Estás fuera de la ubicación permitida. Distancia: ${locCheck.distance} metros.`, true);
+        //return;
+      //}
 
       const lateLimit = new Date(now);
       lateLimit.setHours(23, 15, 0, 0);
