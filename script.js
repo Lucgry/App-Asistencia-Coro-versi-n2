@@ -78,20 +78,11 @@ function updateClock() {
 }
 
 // Validar si fecha y hora están dentro del horario permitido
+// Reemplaza esta función en tu script.js
 function isWithinSchedule(date) {
-  const day = date.getDay(); // 0 = Domingo, 1 = Lunes ...
-  const hour = date.getHours();
-  const minute = date.getMinutes();
-
-  const isValidDay = day === 1 || day === 3 || day === 5; // Lunes, Miércoles, Viernes
-  if (!isValidDay) return false;
-
-  const timeInMinutes = hour * 60 + minute;
-  const startTime = 20 * 60 + 30; // 20:30
-  const endTime = 23 * 60 + 0; // 23:00
-
-  return timeInMinutes >= startTime && timeInMinutes <= endTime;
+  return true; // Siempre permite registrar para pruebas
 }
+
 
 // Calcular distancia en metros entre dos coordenadas (Haversine)
 function getDistanceMeters(lat1, lng1, lat2, lng2) {
