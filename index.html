@@ -3,29 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Registro de Asistencia - Coro</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet" />
+  <title>Registro de Asistencia Coro</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fafafa; padding: 20px; }
+    #clock { font-size: 1.5em; margin-bottom: 15px; font-family: monospace; }
+    #message { margin-top: 15px; font-weight: bold; }
+    form { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 0 6px #ccc; max-width: 400px; }
+    button { margin-top: 10px; padding: 10px 15px; font-size: 1em; }
+    select { width: 100%; padding: 8px; font-size: 1em; }
+  </style>
 </head>
 <body>
-  <header>
-    <img src="logo.png" alt="Logo Coro" id="logo" />
-    
-  </header>
-<main>
-  <div class="container">
-    <h1>Registro de Asistencia</h1>
-    <div id="clock"></div>
-    <form id="attendance-form">
-  <select id="member-select" required>
-    <option value="" disabled selected>Seleccioná tu nombre</option>
-  </select>
-  <button type="submit">Registrar asistencia</button>
-</form>
-    <div id="message"></div>
-  </div>
-</main>
-</main>
+
+  <div id="clock"></div>
+
+  <form id="attendance-form">
+    <label for="member-select">Seleccioná tu nombre:</label>
+    <select id="member-select" required>
+      <option value="" disabled selected>-- Elegí tu nombre --</option>
+    </select>
+
+    <button type="submit">Registrar Asistencia</button>
+  </form>
+
+  <div id="message"></div>
 
   <script src="script.js"></script>
 </body>
