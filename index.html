@@ -3,30 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Registro de Asistencia - Coro</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Registro de Asistencia</title>
   <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <img src="logo.png" alt="Logo Coro" id="logo" />
-    
+    <img id="logo" src="tu-logo.png" alt="Logo" />
+    <h1>Coro de Cámara - Registro de Asistencia</h1>
   </header>
-<main>
-  <div class="container">
-    <h1>Registro de Asistencia</h1>
-    <div id="clock"></div>
-    <form id="attendance-form">
-  <select id="member-select" required>
-    <option value="" disabled selected>Seleccioná tu nombre</option>
-  </select>
-  <button type="submit">Registrar asistencia</button>
-</form>
+  <main>
+    <div id="clock">00:00:00</div>
+    <form id="attendanceForm">
+      <label for="nameSelect">Selecciona tu nombre:</label>
+      <select id="nameSelect" required>
+        <option value="" disabled selected>-- Elige tu nombre --</option>
+        <optgroup label="Sopranos">
+          <option value="Ana">Ana</option>
+          <option value="Bea">Bea</option>
+        </optgroup>
+        <optgroup label="Contraltos">
+          <option value="Clara">Clara</option>
+          <option value="Diana">Diana</option>
+        </optgroup>
+        <optgroup label="Tenores">
+          <option value="Eduardo">Eduardo</option>
+          <option value="Fabián">Fabián</option>
+        </optgroup>
+        <optgroup label="Bajos">
+          <option value="Gustavo">Gustavo</option>
+          <option value="Hugo">Hugo</option>
+        </optgroup>
+      </select>
+      <button type="submit">Registrar Asistencia</button>
+    </form>
     <div id="message"></div>
-  </div>
-</main>
-</main>
-
+  </main>
   <script src="script.js"></script>
 </body>
 </html>
