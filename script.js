@@ -1,5 +1,5 @@
-const form = document.getElementById("form");
-const select = document.getElementById("names");
+const form = document.getElementById("attendanceForm");
+const select = document.getElementById("nameSelect");
 const message = document.getElementById("message");
 
 const allowedDistanceMeters = 500; // Se puede ajustar o quitar para pruebas
@@ -60,7 +60,7 @@ function hasAttendance(name, date) {
   return localStorage.getItem(key) === "true";
 }
 
-function saveAttendance(name, date, isLate) {
+function saveAttendance(name, date) {
   const key = `${name}_${date}`;
   localStorage.setItem(key, "true");
 }
@@ -111,7 +111,7 @@ form.addEventListener("submit", (e) => {
         .then((response) => response.json())
         .then((data) => {
           if (data.status === "success") {
-            saveAttendance(selectedName, formatDate(now), false);
+            saveAttendance(selectedName, formatDate(now));
             showMessage(data.message);
             form.reset();
           } else {
@@ -123,5 +123,7 @@ form.addEventListener("submit", (e) => {
         });
     },
     (error) => {
-      showMessage(
-        "No se pudo obtener la ubicación. A
+      showMessage("No se pudo obtener la ubicación. Asegurate de permitir el acceso.", true);
+    }
+  );
+});
