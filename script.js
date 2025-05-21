@@ -1,43 +1,127 @@
-// Reloj digital en vivo
-function updateClock() {
-  const clock = document.getElementById('clock');
-  const now = new Date();
-  clock.textContent = now.toLocaleTimeString();
+const form = document.getElementById("form");
+const select = document.getElementById("names");
+const message = document.getElementById("message");
+
+const allowedDistanceMeters = 500; // Se puede ajustar o quitar para pruebas
+
+// Función para mostrar mensajes al usuario
+function showMessage(text, isError = false) {
+  message.textContent = text;
+  message.style.color = isError ? "salmon" : "lightgreen";
 }
-setInterval(updateClock, 1000);
-updateClock();
 
-// Enviar asistencia sin restricciones ni validaciones
-document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
+// Limpia mensajes previos
+function clearMessage() {
+  message.textContent = "";
+}
+
+// Formato de fecha dd-mm-yyyy
+function formatDate(date) {
+  return date.toLocaleDateString("es-AR");
+}
+
+// Validar ubicación (puedes comentar o quitar esta función para pruebas sin restricción)
+function validateLocation(position) {
+  // Coordenadas base (ejemplo)
+  const baseLat = -24.7856;
+  const baseLng = -65.4123;
+
+  function toRad(x) {
+    return (x * Math.PI) / 180;
+  }
+
+  function distance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // metros
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  const dist = distance(
+    baseLat,
+    baseLng,
+    position.coords.latitude,
+    position.coords.longitude
+  );
+
+  return { valid: dist <= allowedDistanceMeters, distance: Math.round(dist) };
+}
+
+// LocalStorage para evitar múltiples registros el mismo día
+function hasAttendance(name, date) {
+  const key = `${name}_${date}`;
+  return localStorage.getItem(key) === "true";
+}
+
+function saveAttendance(name, date, isLate) {
+  const key = `${name}_${date}`;
+  localStorage.setItem(key, "true");
+}
+
+// Evento submit del formulario
+form.addEventListener("submit", (e) => {
   e.preventDefault();
+  clearMessage();
 
-  const select = document.getElementById('nameSelect');
-  const nombre = select.value;
-  const message = document.getElementById('message');
-
-  if (!nombre) {
-    message.textContent = 'Por favor, selecciona un nombre.';
+  const selectedName = select.value;
+  if (!selectedName) {
+    showMessage("Por favor, seleccioná tu nombre.", true);
     return;
   }
 
-  message.textContent = 'Registrando...';
+  const now = new Date();
 
-  try {
-    const response = await fetch('https://script.google.com/macros/s/AKfycbysNaXt0k80VXfVyyimmkF6mPXqGnKDX1h9OxU76jsv420Pl7bxD04LONPe59BinsMc/exec', {
-      method: 'POST',
-      body: JSON.stringify({ name: nombre }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    const data = await response.json();
-
-    if (data.status === 'success') {
-      message.textContent = `Asistencia registrada: ${data.data.nombre} a las ${data.data.hora} (${data.data.estado})`;
-    } else {
-      message.textContent = 'Error al registrar asistencia: ' + data.message;
-    }
-
-  } catch (error) {
-    message.textContent = 'Error de conexión: ' + error.message;
+  if (hasAttendance(selectedName, formatDate(now))) {
+    showMessage("Ya registraste tu asistencia hoy.", true);
+    return;
   }
-});
+
+  if (!navigator.geolocation) {
+    showMessage("Geolocalización no soportada por el navegador.", true);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      // Para pruebas sin restricción, comentar esta validación:
+      // const locCheck = validateLocation(position);
+      // if (!locCheck.valid) {
+      //   showMessage(`Estás fuera de la ubicación permitida. Distancia: ${locCheck.distance} metros.`, true);
+      //   return;
+      // }
+
+      // Enviar datos a Google Apps Script
+      fetch(
+        "https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEkYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec",
+        {
+          method: "POST",
+          body: JSON.stringify({ name: selectedName }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            saveAttendance(selectedName, formatDate(now), false);
+            showMessage(data.message);
+            form.reset();
+          } else {
+            showMessage("Error al registrar asistencia: " + data.message, true);
+          }
+        })
+        .catch(() => {
+          showMessage("Error de conexión con el servidor.", true);
+        });
+    },
+    (error) => {
+      showMessage(
+        "No se pudo obtener la ubicación. A
