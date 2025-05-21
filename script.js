@@ -213,11 +213,14 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
   }
   */
 
+  // COMENTADO PARA PRUEBAS: Deshabilita la validación de si ya registró hoy en localStorage
+  /*
   if (hasAttendance(selectedName, formatDate(now))) {
       showMessage("Ya registraste tu asistencia hoy.", true);
       submitButton.disabled = false;
       return;
   }
+  */
 
   // COMENTADO PARA PRUEBAS: Deshabilita la validación de geolocalización
   /*
@@ -248,10 +251,10 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
     */
     // FIN DE COMENTARIOS PARA PRUEBAS DE GEOLOCALIZACIÓN
 
-    // Si pasamos todas las validaciones locales, intentamos enviar a Google Sheets
+    // Si pasamos todas las validaciones locales (o si están comentadas), intentamos enviar a Google Sheets
     showMessage("Registrando asistencia... por favor espera."); // Mensaje de "cargando"
 
-    const response = await fetch(`${GOOGLE_SCRIPT_WEB_APP_URL}?name=${encodeURIComponent(selectedName)}`);
+    const response = await fetch(`<span class="math-inline">\{GOOGLE\_SCRIPT\_WEB\_APP\_URL\}?name\=</span>{encodeURIComponent(selectedName)}`);
 
     if (!response.ok) {
       // Manejar errores de red o HTTP (ej. 404, 500)
@@ -265,7 +268,10 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
       const attendanceDate = formatDate(now);
       const isLate = isLateAccordingToBackend(now); // Usamos la lógica del backend para el mensaje
 
-      saveAttendance(selectedName, attendanceDate, isLate); // Guardamos en localStorage
+      // Guardamos en localStorage solo si el backend confirmó el éxito.
+      // Si habías comentado hasAttendance, esto hará que cada vez que registres
+      // se sobrescriba el último registro para ese día en localStorage.
+      saveAttendance(selectedName, attendanceDate, isLate);
 
       const yearMonth = formatYearMonth(now);
       const lateCount = countLateArrivals(selectedName, yearMonth);
@@ -288,10 +294,3 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
     showMessage(`Ocurrió un error inesperado. Intentá de nuevo. (${error.message || 'Error desconocido'})`, true);
   } finally {
     submitButton.disabled = false; // Siempre habilitamos el botón al finalizar el proceso
-  }
-});
-
-// Inicialización
-loadMembers();
-updateClock();
-setInterval(updateClock, 1000);
