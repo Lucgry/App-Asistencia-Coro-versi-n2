@@ -204,28 +204,33 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
 
   const now = new Date();
 
+  // COMENTADO PARA PRUEBAS: Deshabilita la validación de horario
+  /*
   if (!isWithinSchedule(now)) {
     showMessage("El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.", true);
     submitButton.disabled = false;
     return;
   }
+  */
 
-  // Ahora, verificamos el hasAttendance después de la potencial respuesta exitosa del backend.
-  // Pero lo dejamos aquí para dar un mensaje inmediato si el usuario ya registró *localmente*.
-  // La validación final la hace el backend.
   if (hasAttendance(selectedName, formatDate(now))) {
       showMessage("Ya registraste tu asistencia hoy.", true);
       submitButton.disabled = false;
       return;
   }
 
+  // COMENTADO PARA PRUEBAS: Deshabilita la validación de geolocalización
+  /*
   if (!navigator.geolocation) {
     showMessage("Geolocalización no soportada por el navegador. Usá un navegador compatible.", true);
     submitButton.disabled = false;
     return;
   }
+  */
 
   try {
+    // COMENTADO PARA PRUEBAS: Saltea la obtención y validación de la geolocalización
+    /*
     const position = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
@@ -240,6 +245,8 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
       submitButton.disabled = false;
       return;
     }
+    */
+    // FIN DE COMENTARIOS PARA PRUEBAS DE GEOLOCALIZACIÓN
 
     // Si pasamos todas las validaciones locales, intentamos enviar a Google Sheets
     showMessage("Registrando asistencia... por favor espera."); // Mensaje de "cargando"
