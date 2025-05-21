@@ -254,16 +254,16 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
     // Si pasamos todas las validaciones locales (o si están comentadas), intentamos enviar a Google Sheets
     showMessage("Registrando asistencia... por favor espera."); // Mensaje de "cargando"
 
-    const response = await fetch(`<span class="math-inline">\{GOOGLE\_SCRIPT\_WEB\_APP\_URL\}?name\=</span>{encodeURIComponent(selectedName)}`);
+    const response = await fetch(`${GOOGLE_SCRIPT_WEB_APP_URL}?name=${encodeURIComponent(selectedName)}`); //
 
     if (!response.ok) {
       // Manejar errores de red o HTTP (ej. 404, 500)
-      throw new Error(`Error de red o servidor: ${response.status} ${response.statusText}`);
+      throw new Error(`Error de red o servidor: ${response.status} ${response.statusText}`); //
     }
 
     const result = await response.json(); // Parseamos la respuesta JSON del script de Google
 
-    if (result.status === "success") {
+    if (result.status === "success") { //
       // Si Google Apps Script confirmó el registro:
       const attendanceDate = formatDate(now);
       const isLate = isLateAccordingToBackend(now); // Usamos la lógica del backend para el mensaje
@@ -294,3 +294,10 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
     showMessage(`Ocurrió un error inesperado. Intentá de nuevo. (${error.message || 'Error desconocido'})`, true);
   } finally {
     submitButton.disabled = false; // Siempre habilitamos el botón al finalizar el proceso
+  }
+});
+
+// Inicialización
+loadMembers();
+updateClock();
+setInterval(updateClock, 1000);
