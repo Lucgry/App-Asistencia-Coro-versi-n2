@@ -88,9 +88,9 @@ select {
   color: #eee;
   font-size: 1rem;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.7);
-  /* COMENTADO PARA MEJOR COMPATIBILIDAD EN MÓVILES */
-  /* position: relative; */
-  /* z-index: 2; */
+  /* RESTAURAMOS ESTAS PROPIEDADES */
+  position: relative;
+  z-index: 1; /* Un z-index bajo y conservador */
 }
 
 select option {
@@ -124,21 +124,13 @@ button:hover {
 }
 
 main, .container, form {
-  /* COMENTADO PARA MEJOR COMPATIBILIDAD EN MÓVILES */
+  /* MANTENEMOS ESTO COMENTADO */
   /* overflow: visible; */
 }
 
 form {
   padding-bottom: 3rem; /* Espacio extra debajo del botón */
 }
-
-/* Esta regla 'select' duplicada se elimina/consolida */
-/*
-select {
-  position: relative;
-  z-index: 1000;
-}
-*/
 
 select:focus {
   outline: none;
