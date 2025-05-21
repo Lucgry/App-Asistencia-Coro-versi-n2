@@ -3,42 +3,165 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Registro de Asistencia</title>
+  <title>Registro de Asistencia - Coro</title>
   <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: linear-gradient(to bottom right, #4f46e5, #8b5cf6);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    #clock {
+      font-family: monospace;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    form {
+      background: white;
+      color: black;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      width: 320px;
+      gap: 1rem;
+    }
+    label {
+      font-weight: bold;
+    }
+    select, button {
+      font-size: 1rem;
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #7c3aed;
+    }
+    #message {
+      margin-top: 1rem;
+      height: 1.5rem;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <img id="logo" src="tu-logo.png" alt="Logo" />
+    <img src="tu-logo.png" alt="Logo" width="120" />
     <h1>Coro de Cámara - Registro de Asistencia</h1>
   </header>
-  <main>
-    <div id="clock">00:00:00</div>
-    <form id="attendanceForm">
-      <label for="nameSelect">Selecciona tu nombre:</label>
-      <select id="nameSelect" required>
-        <option value="" disabled selected>-- Elige tu nombre --</option>
-        <optgroup label="Sopranos">
-          <option value="Ana">Ana</option>
-          <option value="Bea">Bea</option>
-        </optgroup>
-        <optgroup label="Contraltos">
-          <option value="Clara">Clara</option>
-          <option value="Diana">Diana</option>
-        </optgroup>
-        <optgroup label="Tenores">
-          <option value="Eduardo">Eduardo</option>
-          <option value="Fabián">Fabián</option>
-        </optgroup>
-        <optgroup label="Bajos">
-          <option value="Gustavo">Gustavo</option>
-          <option value="Hugo">Hugo</option>
-        </optgroup>
-      </select>
-      <button type="submit">Registrar Asistencia</button>
-    </form>
-    <div id="message"></div>
-  </main>
-  <script src="script.js"></script>
+  <div id="clock">00:00:00</div>
+  <form id="attendanceForm">
+    <label for="nameSelect">Selecciona tu nombre:</label>
+    <select id="nameSelect" required>
+      <option value="" disabled selected>-- Elige tu nombre --</option>
+      <optgroup label="Sopranos">
+        <option value="Ana">Ana</option>
+        <option value="Bea">Bea</option>
+      </optgroup>
+      <optgroup label="Contraltos">
+        <option value="Clara">Clara</option>
+        <option value="Diana">Diana</option>
+      </optgroup>
+      <optgroup label="Tenores">
+        <option value="Eduardo">Eduardo</option>
+        <option value="Fabián">Fabián</option>
+      </optgroup>
+      <optgroup label="Bajos">
+        <option value="Gustavo">Gustavo</option>
+        <option value="Hugo">Hugo</option>
+      </optgroup>
+    </select>
+    <button type="submit">Registrar Asistencia</button>
+  </form>
+  <div id="message"></div>
+
+  <script>
+    // Reloj en vivo
+    const clock = document.getElementById("clock");
+    function updateClock() {
+      const now = new Date();
+      clock.textContent = now.toLocaleTimeString("es-AR");
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Formulario y mensajes
+    const form = document.getElementById("attendanceForm");
+    const select = document.getElementById("nameSelect");
+    const message = document.getElementById("message");
+
+    // Para evitar múltiples registros por día con localStorage
+    function formatDate(date) {
+      return date.toLocaleDateString("es-AR");
+    }
+    function hasAttendance(name, date) {
+      const key = `${name}_${date}`;
+      return localStorage.getItem(key) === "true";
+    }
+    function saveAttendance(name, date) {
+      const key = `${name}_${date}`;
+      localStorage.setItem(key, "true");
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      message.textContent = "";
+      const selectedName = select.value;
+      if (!selectedName) {
+        message.style.color = "salmon";
+        message.textContent = "Por favor, seleccioná tu nombre.";
+        return;
+      }
+      const now = new Date();
+      if (hasAttendance(selectedName, formatDate(now))) {
+        message.style.color = "salmon";
+        message.textContent = "Ya registraste tu asistencia hoy.";
+        return;
+      }
+
+      fetch("TU_URL_DE_DEPLOY_DE_GAS", {
+        method: "POST",
+        body: JSON.stringify({ name: selectedName }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === "success") {
+            saveAttendance(selectedName, formatDate(now));
+            message.style.color = "lightgreen";
+            message.textContent = data.message;
+            form.reset();
+          } else {
+            message.style.color = "salmon";
+            message.textContent = "Error: " + data.message;
+          }
+        })
+        .catch(() => {
+          message.style.color = "salmon";
+          message.textContent = "Error de conexión con el servidor.";
+        });
+    });
+  </script>
 </body>
 </html>
