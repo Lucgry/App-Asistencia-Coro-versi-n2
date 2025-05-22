@@ -193,7 +193,7 @@ function isLateAccordingToBackend(date) {
   return hour > 21 || (hour === 21 && minute >= 16);
 }
 
-// Proceso de registro (con geolocalización TEMPORALMENTE DESACTIVADA para pruebas)
+// Proceso de registro (con geolocalización reestructurada con async/await)
 form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
   e.preventDefault();
   clearMessage();
@@ -222,56 +222,36 @@ form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
     return;
   }
 
-  // --- INICIO DEL BLOQUE DE GEOLOCALIZACIÓN COMENTADO (PARA PRUEBAS) ---
-  /*
   // VALIDACIÓN 3: Soporte de Geolocalización
   if (!navigator.geolocation) {
     showMessage("Geolocalización no soportada por el navegador. Usá un navegador compatible.", true);
-    submitButton.disabled = false;
+    submitButton.disabled = false; // Habilitar si hay error aquí
     return;
   }
 
   try {
     // Obtención y validación de la geolocalización
-    showMessage("Obteniendo ubicación...");
+    showMessage("Obteniendo ubicación..."); // Mensaje para el usuario
 
+    // Usamos Promise y await para asegurar que la ubicación se obtiene y valida ANTES de continuar
     const position = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
+        enableHighAccuracy: true,  // Intentar obtener la ubicación más precisa posible
+        timeout: 10000,            // Tiempo máximo para obtener la ubicación (10 segundos)
+        maximumAge: 0              // No usar caché de ubicación (obtener la ubicación actual)
       });
     });
 
     const locCheck = validateLocation(position);
     if (!locCheck.valid) {
       showMessage(`Estás fuera de la ubicación permitida. Distancia: ${locCheck.distance} metros.`, true);
-      submitButton.disabled = false;
-      return;
+      submitButton.disabled = false; // Habilitar si hay error aquí
+      return; // Detiene la ejecución si la ubicación no es válida
     }
-  } catch (error) {
-    // Capturamos errores específicos de geolocalización
-    console.error("Error en geolocalización:", error);
-    if (error.code === error.PERMISSION_DENIED) {
-      showMessage("Permiso de geolocalización denegado. Por favor, permití el acceso a la ubicación para registrar tu asistencia.", true);
-    } else if (error.code === error.POSITION_UNAVAILABLE) {
-      showMessage("Ubicación no disponible. Asegurate de tener el GPS activado y buena señal.", true);
-    } else if (error.code === error.TIMEOUT) {
-      showMessage("Tiempo de espera agotado para obtener la ubicación. Intentá de nuevo.", true);
-    } else {
-      showMessage(`Ocurrió un error inesperado al obtener la ubicación. (${error.message || 'Error desconocido'})`, true);
-    }
-    submitButton.disabled = false; // Habilitar el botón si hay error en geolocalización
-    return; // Detener el flujo si la geolocalización falla
-  }
-  */
-  // --- FIN DEL BLOQUE DE GEOLOCALIZACIÓN COMENTADO ---
 
+    // Si todas las validaciones locales pasan, intentamos enviar a Google Sheets
+    showMessage("Registrando asistencia... por favor espera.");
 
-  // A partir de aquí, el código procederá directamente al registro si las validaciones anteriores pasan
-  showMessage("Registrando asistencia... por favor espera.");
-
-  try {
     const response = await fetch(`${GOOGLE_SCRIPT_WEB_APP_URL}?name=${encodeURIComponent(selectedName)}`);
 
     if (!response.ok) {
@@ -301,9 +281,17 @@ form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
       showMessage(`Error al registrar: ${result.message}`, true);
     }
   } catch (error) {
-    // Capturamos cualquier error en el proceso de envío al Apps Script
-    console.error("Error al enviar al script de Google:", error);
-    showMessage(`Ocurrió un error al enviar el registro: ${error.message || 'Error desconocido'}`, true);
+    // Capturamos cualquier error en el proceso (fallo de red, geolocalización, JSON)
+    console.error("Error en el registro:", error);
+    if (error.code === error.PERMISSION_DENIED) {
+      showMessage("Permiso de geolocalización denegado. Por favor, permití el acceso a la ubicación para registrar tu asistencia.", true);
+    } else if (error.code === error.POSITION_UNAVAILABLE) {
+      showMessage("Ubicación no disponible. Asegurate de tener el GPS activado y buena señal.", true);
+    } else if (error.code === error.TIMEOUT) {
+      showMessage("Tiempo de espera agotado para obtener la ubicación. Intentá de nuevo.", true);
+    } else {
+      showMessage(`Ocurrió un error inesperado. Intentá de nuevo. (${error.message || 'Error desconocido'})`, true);
+    }
   } finally {
     submitButton.disabled = false; // Siempre habilitar el botón al finalizar el proceso
   }
