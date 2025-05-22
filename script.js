@@ -40,9 +40,9 @@ const choirMembers = {
 };
 
 const locationAllowed = {
-  lat: -24.786465581637948, // Coordenada de latitud de la Fundación Salta
-  lng: -65.40845963142719, // Coordenada de longitud de la Fundación Salta
-  radiusMeters: 85, // Radio en metros alrededor de la Fundación Salta
+  lat: -24.790111, // Latitud de tu casa (aproximada)
+  lng: -65.397889, // Longitud de tu casa (aproximada)
+  radiusMeters: 150, // Radio en metros alrededor de tu casa (ajustable)
 };
 
 // ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
