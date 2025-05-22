@@ -80,7 +80,7 @@ function updateClock() {
   });
   clock.textContent = timeStr;
 }
-
+/*
 // Validar si fecha y hora están dentro del horario permitido
 function isWithinSchedule(date) {
   const day = date.getDay(); // 0 = Domingo, 1 = Lunes ...
@@ -97,7 +97,7 @@ function isWithinSchedule(date) {
 
   return timeInMinutes >= startTime && timeInMinutes <= endTime;
 }
-
+*/
 // Calcular distancia en metros entre dos coordenadas (Haversine)
 function getDistanceMeters(lat1, lng1, lat2, lng2) {
   const toRad = (deg) => (deg * Math.PI) / 180;
