@@ -46,7 +46,7 @@ const locationAllowed = {
 };
 
 // ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
-const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqUQLauQqzWo6rZPEjYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec'; // Asegúrate de que esta URL sea la correcta y actualizada de tu despliegue
+const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEyYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec'; // ASEGÚRATE de que esta URL sea la CORRECTA y ACTUALIZADA de tu despliegue
 
 const form = document.getElementById("attendance-form");
 const select = document.getElementById("member-select");
@@ -80,13 +80,13 @@ function updateClock() {
   });
   clock.textContent = timeStr;
 }
-/*
+
 // Validar si fecha y hora están dentro del horario permitido
 function isWithinSchedule(date) {
   const day = date.getDay(); // 0 = Domingo, 1 = Lunes ...
   const hour = date.getHours();
   const minute = date.getMinutes();
-*/
+
   // Horario permitido: Lunes, Miércoles, Viernes de 20:30 a 23:00
   const isValidDay = day === 1 || day === 3 || day === 5;
   if (!isValidDay) return false;
@@ -208,12 +208,14 @@ form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
 
   const now = new Date();
 
-  // VALIDACIÓN 1: Horario permitido
+  // VALIDACIÓN 1: Horario permitido (TEMPORALMENTE COMENTADA PARA PRUEBAS)
+  /*
   if (!isWithinSchedule(now)) {
     showMessage("El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.", true);
     submitButton.disabled = false;
     return;
   }
+  */
 
   // VALIDACIÓN 2: Ya registró asistencia hoy (basado en localStorage)
   if (hasAttendance(selectedName, formatDate(now))) {
