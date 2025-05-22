@@ -235,7 +235,7 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
   try {
     // Obtención y validación de la geolocalización
     showMessage("Obteniendo ubicación..."); // Mensaje mientras se obtiene la ubicación
-    const position = await new Promise((resolve, reject) => {
+    const position = await new Promise((resolve, reject) => { // Usamos Promise y await para esperar
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,  // Intentar obtener la ubicación más precisa posible
         timeout: 10000,            // Tiempo máximo para obtener la ubicación (10 segundos)
