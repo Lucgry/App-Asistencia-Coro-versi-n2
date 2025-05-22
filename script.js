@@ -40,13 +40,14 @@ const choirMembers = {
 };
 
 const locationAllowed = {
-  lat: -24.790111, // Latitud de tu casa (aproximada)
-  lng: -65.397889, // Longitud de tu casa (aproximada)
-  radiusMeters: 1000, // Radio en metros alrededor de tu casa (ajustable)
+  lat: -24.786465581637948, // Coordenada de latitud de la Fundación Salta
+  lng: -65.40845963142719, // Coordenada de longitud de la Fundación Salta
+  radiusMeters: 85, // Radio en metros alrededor de la Fundación Salta
 };
 
 // ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
-const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEkYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec'; // ASEGÚRATE de que esta URL sea la CORRECTA y ACTUALIZADA de tu despliegue
+// Asegúrate de que esta URL sea la CORRECTA y ACTUALIZADA de tu despliegue
+const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEkYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec';
 
 const form = document.getElementById("attendance-form");
 const select = document.getElementById("member-select");
@@ -167,7 +168,8 @@ function showMessage(text, isError = false) {
     navigator.vibrate(100); // Vibrar el dispositivo en móvil
   }
   if (!isError) {
-    setTimeout(clearMessage, 5000); // Borra el mensaje de éxito después de 5 segundos
+    // Aumentado a 10 segundos (10000 milisegundos)
+    setTimeout(clearMessage, 10000); // Borra el mensaje de éxito después de 10 segundos
   }
 }
 
@@ -185,15 +187,17 @@ function formatYearMonth(date) {
   return date.toISOString().slice(0, 7);
 }
 
-// Función para determinar si es "tarde" según el criterio de Google Apps Script
-function isLateAccordingToBackend(date) {
+// Función para determinar si es "tarde" según el criterio de Google Apps Script (21:16)
+// Esta función ahora solo se usa en el cliente para el mensaje y el conteo local.
+function isLateAccordingToAppsScriptLogic(date) {
   const hour = date.getHours();
   const minute = date.getMinutes();
-  // El backend considera tarde si la hora es > 21 o (hora === 21 y minuto >= 16)
+  // Se considera tarde si la hora es > 21 o (hora === 21 y minuto >= 16)
   return hour > 21 || (hour === 21 && minute >= 16);
 }
 
-// Proceso de registro (con geolocalización reestructurada con async/await)
+
+// Proceso de registro (con geolocalización estructurada con async/await y sin enviar status)
 form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
   e.preventDefault();
   clearMessage();
@@ -233,7 +237,6 @@ form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
     // Obtención y validación de la geolocalización
     showMessage("Obteniendo ubicación..."); // Mensaje para el usuario
 
-    // Usamos Promise y await para asegurar que la ubicación se obtiene y valida ANTES de continuar
     const position = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,  // Intentar obtener la ubicación más precisa posible
@@ -249,9 +252,15 @@ form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
       return; // Detiene la ejecución si la ubicación no es válida
     }
 
+    // --- CÁLCULO DEL ESTADO "TARDE" PARA EL MENSAJE LOCAL Y localStorage ---
+    // Usamos la misma lógica que el Apps Script para coherencia en el cliente
+    const isLateForClientDisplay = isLateAccordingToAppsScriptLogic(now);
+
     // Si todas las validaciones locales pasan, intentamos enviar a Google Sheets
     showMessage("Registrando asistencia... por favor espera.");
 
+    // --- ¡IMPORTANTE! NO ENVIAMOS EL PARÁMETRO 'status' AQUÍ.
+    // El Apps Script lo calcula solo.
     const response = await fetch(`${GOOGLE_SCRIPT_WEB_APP_URL}?name=${encodeURIComponent(selectedName)}`);
 
     if (!response.ok) {
@@ -262,20 +271,24 @@ form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
 
     if (result.status === "success") {
       const attendanceDate = formatDate(now);
-      const isLate = isLateAccordingToBackend(now);
+      // 'isLateForClientDisplay' ya está calculado
 
-      saveAttendance(selectedName, attendanceDate, isLate); // Guardar en localStorage
+      saveAttendance(selectedName, attendanceDate, isLateForClientDisplay); // Guardar en localStorage
 
       const yearMonth = formatYearMonth(now);
       const lateCount = countLateArrivals(selectedName, yearMonth);
 
       let successMessage = "¡Asistencia registrada correctamente!";
-      if (isLate) {
+      let messageColorIsRed = false; // Por defecto el color es verde
+
+      if (isLateForClientDisplay) { // Si es tarde, ajustamos el mensaje y el color
         successMessage += ` Llegaste tarde. Total llegadas tarde en este mes: ${lateCount}.`;
+        messageColorIsRed = true; // Para que el mensaje sea rojo
       } else {
         successMessage += " ¡A tiempo!";
       }
-      showMessage(successMessage);
+      // Pasamos 'messageColorIsRed' para que showMessage sepa qué color usar
+      showMessage(successMessage, messageColorIsRed);
       form.reset(); // Limpiar formulario si el registro fue exitoso
     } else {
       showMessage(`Error al registrar: ${result.message}`, true);
