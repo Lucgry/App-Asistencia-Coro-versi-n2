@@ -86,7 +86,7 @@ function isWithinSchedule(date) {
   const day = date.getDay(); // 0 = Domingo, 1 = Lunes ...
   const hour = date.getHours();
   const minute = date.getMinutes();
-
+*/
   // Horario permitido: Lunes, Miércoles, Viernes de 20:30 a 23:00
   const isValidDay = day === 1 || day === 3 || day === 5;
   if (!isValidDay) return false;
@@ -97,7 +97,7 @@ function isWithinSchedule(date) {
 
   return timeInMinutes >= startTime && timeInMinutes <= endTime;
 }
-*/
+
 // Calcular distancia en metros entre dos coordenadas (Haversine)
 function getDistanceMeters(lat1, lng1, lat2, lng2) {
   const toRad = (deg) => (deg * Math.PI) / 180;
