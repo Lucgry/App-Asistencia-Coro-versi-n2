@@ -42,7 +42,7 @@ const choirMembers = {
 const locationAllowed = {
   lat: -24.790111, // Latitud de tu casa (aproximada)
   lng: -65.397889, // Longitud de tu casa (aproximada)
-  radiusMeters: 150, // Radio en metros alrededor de tu casa (ajustable)
+  radiusMeters: 1000, // Radio en metros alrededor de tu casa (ajustable)
 };
 
 // ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
