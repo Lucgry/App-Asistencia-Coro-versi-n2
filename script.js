@@ -46,7 +46,7 @@ const locationAllowed = {
 };
 
 // ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
-const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEkYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec';
+const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqUQLauQqzWo6rZPEjYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec'; // Asegúrate de que esta URL sea la correcta y actualizada de tu despliegue
 
 const form = document.getElementById("attendance-form");
 const select = document.getElementById("member-select");
@@ -146,12 +146,11 @@ function countLateArrivals(name, yearMonth) {
   let count = 0;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith("asistencia_" + name)) { // Verifica que key no sea null
+    if (key && key.startsWith("asistencia_" + name)) {
       try {
         const record = JSON.parse(localStorage.getItem(key));
-        if (record && record.isLate) { // Verifica que record no sea null
-          // comparar año y mes (formato AAAA-MM)
-          if (record.date && record.date.startsWith(yearMonth)) count++; // Verifica que record.date exista
+        if (record && record.isLate) {
+          if (record.date && record.date.startsWith(yearMonth)) count++;
         }
       } catch (e) {
         console.error("Error parseando item de localStorage:", key, e);
@@ -167,7 +166,6 @@ function showMessage(text, isError = false) {
   if ("vibrate" in navigator) {
     navigator.vibrate(100); // Vibrar el dispositivo en móvil
   }
-  // Después de mostrar el mensaje, lo borramos tras un tiempo si no es un error persistente
   if (!isError) {
     setTimeout(clearMessage, 5000); // Borra el mensaje de éxito después de 5 segundos
   }
@@ -188,7 +186,6 @@ function formatYearMonth(date) {
 }
 
 // Función para determinar si es "tarde" según el criterio de Google Apps Script
-// Esto debería estar en sincronía con la lógica de tu script de Google Sheets.
 function isLateAccordingToBackend(date) {
   const hour = date.getHours();
   const minute = date.getMinutes();
@@ -197,15 +194,15 @@ function isLateAccordingToBackend(date) {
 }
 
 // Proceso de registro
-form.addEventListener("submit", async (e) => { // Marcamos la función como 'async'
+form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
   e.preventDefault();
   clearMessage();
-  submitButton.disabled = true; // Deshabilitamos el botón para evitar envíos múltiples
+  submitButton.disabled = true;
 
   const selectedName = select.value;
   if (!selectedName) {
     showMessage("Por favor, seleccioná tu nombre.", true);
-    submitButton.disabled = false; // Habilitamos el botón
+    submitButton.disabled = false;
     return;
   }
 
@@ -234,12 +231,13 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
 
   try {
     // Obtención y validación de la geolocalización
-    showMessage("Obteniendo ubicación..."); // Mensaje mientras se obtiene la ubicación
-    const position = await new Promise((resolve, reject) => { // Usamos Promise y await para esperar
+    showMessage("Obteniendo ubicación...");
+    // <<< ¡CLAVE! "await new Promise" para esperar la respuesta de geolocalización
+    const position = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,  // Intentar obtener la ubicación más precisa posible
-        timeout: 10000,            // Tiempo máximo para obtener la ubicación (10 segundos)
-        maximumAge: 0              // No usar caché de ubicación (obtener la ubicación actual)
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       });
     });
 
@@ -251,23 +249,20 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
     }
 
     // Si todas las validaciones locales pasan, intentamos enviar a Google Sheets
-    showMessage("Registrando asistencia... por favor espera."); // Mensaje de "cargando"
+    showMessage("Registrando asistencia... por favor espera.");
 
     const response = await fetch(`${GOOGLE_SCRIPT_WEB_APP_URL}?name=${encodeURIComponent(selectedName)}`);
 
     if (!response.ok) {
-      // Manejar errores de red o HTTP (ej. 404, 500)
       throw new Error(`Error de red o servidor: ${response.status} ${response.statusText}`);
     }
 
-    const result = await response.json(); // Parseamos la respuesta JSON del script de Google
+    const result = await response.json();
 
     if (result.status === "success") {
-      // Si Google Apps Script confirmó el registro:
       const attendanceDate = formatDate(now);
-      const isLate = isLateAccordingToBackend(now); // Usamos la lógica del backend para el mensaje de tardanza
+      const isLate = isLateAccordingToBackend(now);
 
-      // Guardamos en localStorage solo si el backend confirmó el éxito.
       saveAttendance(selectedName, attendanceDate, isLate);
 
       const yearMonth = formatYearMonth(now);
@@ -280,13 +275,11 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
         successMessage += " ¡A tiempo!";
       }
       showMessage(successMessage);
-      form.reset(); // Limpiamos el formulario solo si el registro fue exitoso
+      form.reset();
     } else {
-      // Si Google Apps Script devolvió un error específico
       showMessage(`Error al registrar: ${result.message}`, true);
     }
   } catch (error) {
-    // Capturamos cualquier error en el proceso (fallo de red, geolocalización, JSON)
     console.error("Error en el registro:", error);
     if (error.code === error.PERMISSION_DENIED) {
       showMessage("Permiso de geolocalización denegado. Por favor, permití el acceso a la ubicación para registrar tu asistencia.", true);
@@ -298,11 +291,11 @@ form.addEventListener("submit", async (e) => { // Marcamos la función como 'asy
       showMessage(`Ocurrió un error inesperado. Intentá de nuevo. (${error.message || 'Error desconocido'})`, true);
     }
   } finally {
-    submitButton.disabled = false; // Siempre habilitamos el botón al finalizar el proceso
+    submitButton.disabled = false;
   }
 });
 
 // Inicialización
 loadMembers();
 updateClock();
-setInterval(updateClock, 1000); // Actualiza el reloj cada segundo
+setInterval(updateClock, 1000);
