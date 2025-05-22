@@ -40,9 +40,9 @@ const choirMembers = {
 };
 
 const locationAllowed = {
-  lat: -24.786465581637948, // Coordenada de latitud de la Fundación Salta
-  lng: -65.40845963142719, // Coordenada de longitud de la Fundación Salta
-  radiusMeters: 85, // Radio en metros alrededor de la Fundación Salta
+  lat: -24.790111, // Coordenada de latitud de tu casa (aproximada)
+  lng: -65.397889, // Coordenada de longitud de tu casa (aproximada)
+  radiusMeters: 150, // Radio en metros alrededor de tu casa (ajustable)
 };
 
 // ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
@@ -168,8 +168,8 @@ function showMessage(text, isError = false) {
     navigator.vibrate(100); // Vibrar el dispositivo en móvil
   }
   if (!isError) {
-    // Aumentado a 10 segundos (10000 milisegundos)
-    setTimeout(clearMessage, 10000); // Borra el mensaje de éxito después de 10 segundos
+    // CAMBIO A 15 SEGUNDOS: 15000 milisegundos
+    setTimeout(clearMessage, 15000); // Borra el mensaje de éxito después de 15 segundos
   }
 }
 
@@ -188,7 +188,6 @@ function formatYearMonth(date) {
 }
 
 // Función para determinar si es "tarde" según el criterio de Google Apps Script (21:16)
-// Esta función ahora solo se usa en el cliente para el mensaje y el conteo local.
 function isLateAccordingToAppsScriptLogic(date) {
   const hour = date.getHours();
   const minute = date.getMinutes();
@@ -253,7 +252,6 @@ form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
     }
 
     // --- CÁLCULO DEL ESTADO "TARDE" PARA EL MENSAJE LOCAL Y localStorage ---
-    // Usamos la misma lógica que el Apps Script para coherencia en el cliente
     const isLateForClientDisplay = isLateAccordingToAppsScriptLogic(now);
 
     // Si todas las validaciones locales pasan, intentamos enviar a Google Sheets
@@ -279,6 +277,7 @@ form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
       const lateCount = countLateArrivals(selectedName, yearMonth);
 
       let successMessage = "¡Asistencia registrada correctamente!";
+      // Variable para controlar el color del mensaje
       let messageColorIsRed = false; // Por defecto el color es verde
 
       if (isLateForClientDisplay) { // Si es tarde, ajustamos el mensaje y el color
