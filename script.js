@@ -1,173 +1,315 @@
-// ** ¡LA ÚLTIMA URL DE GOOGLE APPS SCRIPT PARA LECTURA QUE ME DISTE! **
-const GOOGLE_SCRIPT_READ_URL = 'https://script.google.com/macros/s/AKfycbxYLCxEVkvQ7eCh0FT9pPHlLL7veqTfOiyp7_0uGCOx6qxuKIeXXheXL-62IQIopz7weQ/exec'; 
-
-const attendanceTableBody = document.querySelector('#attendance-table tbody');
-const totalRegistradosSpan = document.getElementById('total-registrados');
-const totalTardeSpan = document.getElementById('total-tarde');
-const totalAusentesSpan = document.getElementById('total-ausentes');
-const lastUpdatedSpan = document.getElementById('last-updated');
-const refreshButton = document.getElementById('refresh-button');
-const loadingMessage = document.getElementById('loading-message');
-const currentDateDisplay = document.getElementById('current-date');
-const currentTimeDisplay = document.getElementById('current-time'); // Elemento para el reloj
-
-// Miembros del coro, organizados por cuerda y ordenados alfabéticamente
-// ¡IMPORTANTE! Asegúrate de que esta lista sea EXACTA con los nombres en tu planilla.
-const allChoirMembersBySection = {
-    "Sopranos": [
-        "Aparicio Rocío",
-        "Aramayo Valentina",
-        "Evangelista Maira",
-        "Ferri Mónica",
-        "Gallardo Cintia",
-        "Perez Gesualdo Anahi",
-        "Romina Andrea",
-        "Ruiz Paola",
-        "Solís Lucero",
-        "Suárez Daniela"
-    ].sort((a, b) => a.localeCompare(b)), // Ordena alfabéticamente las sopranos
-    "Contraltos": [
-        "Aguilera Abril",
-        "Buchller Patricia",
-        "Caro Zaira",
-        "Cuello Sandra",
-        "Galvez Delfina",
-        "Salmoral Carolina"
-    ].sort((a, b) => a.localeCompare(b)), // Ordena alfabéticamente las contraltos
-    "Tenores": [
-        "Groppa Octavio",
-        "Liendro Gabriel",
-        "Otero Oscar",
-        "Roldán Cristian",
-        "Silva G. José",
-        "Valdez Julio",
-        "Velárdez José"
-    ].sort((a, b) => a.localeCompare(b)), // Ordena alfabéticamente los tenores
-    "Bajos": [
-        "Colqui Marcelo",
-        "Goytia Abel",
-        "Ibarra Wally",
-        "Jardín Augusto",
-        "Rocha Ariel",
-        "Villafañe Valentín"
-    ].sort((a, b) => a.localeCompare(b)) // Ordena alfabéticamente los bajos
+// Datos de integrantes por cuerda (ordenados alfabéticamente)
+const choirMembers = {
+  Sopranos: [
+    "Aparicio Rocío",
+    "Aramayo Valentina",
+    "Evangelista Maira",
+    "Ferri Mónica",
+    "Gallardo Cintia",
+    "Perez Gesualdo Anahi",
+    "Romina Andrea",
+    "Ruiz Paola",
+    "Solís Lucero",
+    "Suárez Daniela",
+  ],
+  Contraltos: [
+    "Aguilera Abril",
+    "Buchller Patricia",
+    "Caro Zaira",
+    "Cuello Sandra",
+    "Galvez Delfina",
+    "Salmoral Carolina",
+  ],
+  Tenores: [
+    "Groppa Octavio",
+    "Liendro Gabriel",
+    "Otero Oscar",
+    "Roldán Cristian",
+    "Silva G. José",
+    "Valdez Julio",
+    "Velárdez José",
+  ],
+  Bajos: [
+    "Colqui Marcelo",
+    "Goytia Abel",
+    "Ibarra Wally",
+    "Jardín Augusto",
+    "Rocha Ariel",
+    "Villafañe Valentín",
+  ],
 };
 
-// Crea una lista plana de todos los miembros para verificaciones rápidas y el conteo total
-const allChoirMembersFlat = Object.values(allChoirMembersBySection).flat();
+const locationAllowed = {
+  lat: -24.790111, // Coordenada de latitud de tu casa (aproximada)
+  lng: -65.397889, // Coordenada de longitud de tu casa (aproximada)
+  radiusMeters: 1500, // Radio en metros alrededor de tu casa (ajustable)
+};
 
-// Función para actualizar el reloj y la fecha en tiempo real
+// ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
+// Asegúrate de que esta URL sea la CORRECTA y ACTUALIZADA de tu despliegue
+const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEkYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec';
+
+const form = document.getElementById("attendance-form");
+const select = document.getElementById("member-select");
+const message = document.getElementById("message");
+const clock = document.getElementById("clock");
+const submitButton = form.querySelector('button[type="submit"]'); // Para deshabilitar el botón
+
+// Función para cargar los miembros en el select
+function loadMembers() {
+  for (const cuerda in choirMembers) {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = cuerda;
+    choirMembers[cuerda].forEach((name) => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      optgroup.appendChild(option);
+    });
+    select.appendChild(optgroup);
+  }
+}
+
+// Función para actualizar el reloj cada segundo
 function updateClock() {
-    const ahora = new Date();
-    const zona = 'es-AR'; // 'es-AR' para español de Argentina
-    const opcionesHora = {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false // Formato de 24 horas
-    };
-    
-    const opcionesFecha = { 
-        weekday: 'long', 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-    };
-
-    currentTimeDisplay.textContent = ahora.toLocaleTimeString(zona, opcionesHora);
-    currentDateDisplay.textContent = `Asistencia para hoy: ${ahora.toLocaleDateString(zona, opcionesFecha)}`;
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString("es-AR", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  clock.textContent = timeStr;
 }
 
+// Validar si fecha y hora están dentro del horario permitido
+function isWithinSchedule(date) {
+  const day = date.getDay(); // 0 = Domingo, 1 = Lunes ...
+  const hour = date.getHours();
+  const minute = date.getMinutes();
 
-async function fetchAttendanceData() {
-    attendanceTableBody.innerHTML = ''; // Limpiar tabla
-    loadingMessage.style.display = 'block'; // Mostrar mensaje de carga
-    refreshButton.disabled = true; // Deshabilitar botón durante la carga
+  // Horario permitido: Lunes, Miércoles, Viernes de 20:30 a 23:00
+  const isValidDay = day === 1 || day === 3 || day === 5;
+  if (!isValidDay) return false;
 
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_READ_URL);
-        const result = await response.json();
+  const timeInMinutes = hour * 60 + minute;
+  const startTime = 20 * 60 + 30; // 20:30
+  const endTime = 23 * 60 + 0; // 23:00
 
-        if (result.status === "success") {
-            const todayAttendance = result.data; // Ya está filtrado por hoy desde el script
+  return timeInMinutes >= startTime && timeInMinutes <= endTime;
+}
 
-            let countRegistrados = 0;
-            let countTarde = 0;
-            
-            // Crear un mapa para buscar rápidamente la asistencia de un coreuta
-            const attendanceMap = new Map();
-            todayAttendance.forEach(entry => {
-                attendanceMap.set(entry.nombre, { hora: entry.hora, estado: entry.estado });
-            });
+// Calcular distancia en metros entre dos coordenadas (Haversine)
+function getDistanceMeters(lat1, lng1, lat2, lng2) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const R = 6371e3; // Radio de la Tierra en metros
+  const φ1 = toRad(lat1);
+  const φ2 = toRad(lat2);
+  const Δφ = toRad(lat2 - lat1);
+  const Δλ = toRad(lng2 - lng1);
 
-            // Iterar por cada cuerda definida en allChoirMembersBySection
-            for (const sectionName in allChoirMembersBySection) {
-                // Añadir un encabezado de cuerda a la tabla
-                const sectionHeaderRow = attendanceTableBody.insertRow();
-                sectionHeaderRow.classList.add('section-header'); // Para estilizar con CSS
-                const headerCell = sectionHeaderRow.insertCell(0);
-                headerCell.colSpan = 3; // Ocupa las 3 columnas
-                headerCell.textContent = sectionName;
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-                // Iterar por cada miembro dentro de la cuerda (ya están ordenados alfabéticamente)
-                allChoirMembersBySection[sectionName].forEach(member => {
-                    const row = attendanceTableBody.insertRow();
-                    row.insertCell(0).textContent = member; // Nombre del coreuta
+  return R * c; // Distancia en metros
+}
 
-                    if (attendanceMap.has(member)) {
-                        // El coreuta ha registrado hoy
-                        const entry = attendanceMap.get(member);
-                        row.insertCell(1).textContent = entry.hora; // Hora de registro
-                        const statusCell = row.insertCell(2);
-                        statusCell.textContent = entry.estado;
-                        statusCell.classList.add('status-cell', entry.estado);
+// Validar ubicación con geolocalización
+function validateLocation(position) {
+  const { latitude, longitude } = position.coords;
+  const distance = getDistanceMeters(
+    latitude,
+    longitude,
+    locationAllowed.lat,
+    locationAllowed.lng
+  );
+  return distance <= locationAllowed.radiusMeters
+    ? { valid: true }
+    : { valid: false, distance: distance.toFixed(1) };
+}
 
-                        countRegistrados++; // Contar coreutas registrados
-                        if (entry.estado === 'Tarde') {
-                            countTarde++; // Contar llegadas tarde
-                        }
-                    } else {
-                        // El coreuta NO ha registrado hoy (posible ausente)
-                        row.insertCell(1).textContent = '-'; // No hay hora de registro
-                        const statusCell = row.insertCell(2);
-                        statusCell.textContent = 'Ausente';
-                        statusCell.classList.add('status-cell', 'Ausente');
-                    }
-                });
-            }
+// Guardar asistencia en localStorage para control local
+function saveAttendance(name, date, isLate) {
+  const key = `asistencia_${name}_${date}`;
+  localStorage.setItem(key, JSON.stringify({ name, date, isLate }));
+}
 
-            // Actualizar contadores globales en la interfaz
-            totalRegistradosSpan.textContent = countRegistrados;
-            totalTardeSpan.textContent = countTarde;
-            // El total de ausentes es el total de miembros de la lista completa menos los registrados
-            totalAusentesSpan.textContent = allChoirMembersFlat.length - countRegistrados; 
-            
-        } else {
-            console.error('Error al obtener datos:', result.message);
-            alert('Error al cargar la asistencia: ' + result.message);
+// Verificar si ya registró asistencia hoy en localStorage
+function hasAttendance(name, date) {
+  const key = `asistencia_${name}_${date}`;
+  return localStorage.getItem(key) !== null;
+}
+
+// Contar llegadas tarde en el mes actual desde localStorage
+function countLateArrivals(name, yearMonth) {
+  let count = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("asistencia_" + name)) {
+      try {
+        const record = JSON.parse(localStorage.getItem(key));
+        if (record && record.isLate) {
+          if (record.date && record.date.startsWith(yearMonth)) count++;
         }
-    } catch (error) {
-        console.error('Error de conexión o de red:', error);
-        alert('No se pudieron cargar los datos. Revisa tu conexión a internet o la URL del script.');
-    } finally {
-        loadingMessage.style.display = 'none'; // Ocultar mensaje de carga
-        refreshButton.disabled = false; // Habilitar botón
-        // Mueve la actualización de la hora de última actualización aquí para que se haga después de la carga
-        lastUpdatedSpan.textContent = `Última actualización: ${new Date().toLocaleTimeString('es-AR')}`;
+      } catch (e) {
+        console.error("Error parseando item de localStorage:", key, e);
+      }
     }
+  }
+  return count;
 }
 
-// Event listener para el botón de actualizar
-refreshButton.addEventListener('click', fetchAttendanceData);
+function showMessage(text, isError = false) {
+  message.textContent = text;
+  message.style.color = isError ? "#ff6666" : "#66ff66";
+  if ("vibrate" in navigator) {
+    navigator.vibrate(100); // Vibrar el dispositivo en móvil
+  }
+  if (!isError) {
+    // CAMBIO A 15 SEGUNDOS: 15000 milisegundos
+    setTimeout(clearMessage, 15000); // Borra el mensaje de éxito después de 15 segundos
+  }
+}
 
-// --- INICIO CÓDIGO RELOJ Y FECHA ---
-// Llama a updateClock() una vez al inicio para mostrar el reloj y la fecha inmediatamente
-updateClock(); 
-// Luego, actualiza el reloj y la fecha cada segundo
-setInterval(updateClock, 1000); 
-// --- FIN CÓDIGO RELOJ Y FECHA ---
+function clearMessage() {
+  message.textContent = "";
+}
 
-// Cargar datos de asistencia al iniciar la página (después de iniciar el reloj)
-fetchAttendanceData();
-// Opcional: Actualizar datos de asistencia automáticamente cada cierto tiempo (ej. cada 30 segundos)
-// setInterval(fetchAttendanceData, 30000);
+// Convertir fecha a AAAA-MM-DD (ej: 2025-05-22)
+function formatDate(date) {
+  return date.toISOString().split("T")[0];
+}
+
+// Convertir fecha a AAAA-MM (ej: 2025-05)
+function formatYearMonth(date) {
+  return date.toISOString().slice(0, 7);
+}
+
+// Función para determinar si es "tarde" según el criterio de Google Apps Script (21:16)
+function isLateAccordingToAppsScriptLogic(date) {
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  // Se considera tarde si la hora es > 21 o (hora === 21 y minuto >= 16)
+  return hour > 21 || (hour === 21 && minute >= 16);
+}
+
+
+// Proceso de registro (con geolocalización estructurada con async/await y sin enviar status)
+form.addEventListener("submit", async (e) => { // <<< ¡CLAVE! "async" aquí
+  e.preventDefault();
+  clearMessage();
+  submitButton.disabled = true; // Deshabilitamos el botón al inicio
+
+  const selectedName = select.value;
+  if (!selectedName) {
+    showMessage("Por favor, seleccioná tu nombre.", true);
+    submitButton.disabled = false; // Habilitar si hay error aquí
+    return;
+  }
+
+  const now = new Date();
+
+  // VALIDACIÓN 1: Horario permitido
+  if (!isWithinSchedule(now)) {
+    showMessage("El registro sólo está permitido los lunes, miércoles y viernes de 20:30 a 23:00.", true);
+    submitButton.disabled = false; // Habilitar si hay error aquí
+    return;
+  }
+
+  // VALIDACIÓN 2: Ya registró asistencia hoy (basado en localStorage)
+  if (hasAttendance(selectedName, formatDate(now))) {
+    showMessage("Ya registraste tu asistencia hoy.", true);
+    submitButton.disabled = false; // Habilitar si hay error aquí
+    return;
+  }
+
+  // VALIDACIÓN 3: Soporte de Geolocalización
+  if (!navigator.geolocation) {
+    showMessage("Geolocalización no soportada por el navegador. Usá un navegador compatible.", true);
+    submitButton.disabled = false; // Habilitar si hay error aquí
+    return;
+  }
+
+  try {
+    // Obtención y validación de la geolocalización
+    showMessage("Obteniendo ubicación..."); // Mensaje para el usuario
+
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,  // Intentar obtener la ubicación más precisa posible
+        timeout: 10000,            // Tiempo máximo para obtener la ubicación (10 segundos)
+        maximumAge: 0              // No usar caché de ubicación (obtener la ubicación actual)
+      });
+    });
+
+    const locCheck = validateLocation(position);
+    if (!locCheck.valid) {
+      showMessage(`Estás fuera de la ubicación permitida. Distancia: ${locCheck.distance} metros.`, true);
+      submitButton.disabled = false; // Habilitar si hay error aquí
+      return; // Detiene la ejecución si la ubicación no es válida
+    }
+
+    // --- CÁLCULO DEL ESTADO "TARDE" PARA EL MENSAJE LOCAL Y localStorage ---
+    const isLateForClientDisplay = isLateAccordingToAppsScriptLogic(now);
+
+    // Si todas las validaciones locales pasan, intentamos enviar a Google Sheets
+    showMessage("Registrando asistencia... por favor espera.");
+
+    // --- ¡IMPORTANTE! NO ENVIAMOS EL PARÁMETRO 'status' AQUÍ.
+    // El Apps Script lo calcula solo.
+    const response = await fetch(`${GOOGLE_SCRIPT_WEB_APP_URL}?name=${encodeURIComponent(selectedName)}`);
+
+    if (!response.ok) {
+      throw new Error(`Error de red o servidor: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json(); // Parseamos la respuesta JSON del script de Google
+
+    if (result.status === "success") {
+      const attendanceDate = formatDate(now);
+      // 'isLateForClientDisplay' ya está calculado
+
+      saveAttendance(selectedName, attendanceDate, isLateForClientDisplay); // Guardar en localStorage
+
+      const yearMonth = formatYearMonth(now);
+      const lateCount = countLateArrivals(selectedName, yearMonth);
+
+      let successMessage = "¡Asistencia registrada correctamente!";
+      // Variable para controlar el color del mensaje
+      let messageColorIsRed = false; // Por defecto el color es verde
+
+      if (isLateForClientDisplay) { // Si es tarde, ajustamos el mensaje y el color
+        successMessage += ` Llegaste tarde. Total llegadas tarde en este mes: ${lateCount}.`;
+        messageColorIsRed = true; // Para que el mensaje sea rojo
+      } else {
+        successMessage += " ¡A tiempo!";
+      }
+      // Pasamos 'messageColorIsRed' para que showMessage sepa qué color usar
+      showMessage(successMessage, messageColorIsRed);
+      form.reset(); // Limpiar formulario si el registro fue exitoso
+    } else {
+      showMessage(`Error al registrar: ${result.message}`, true);
+    }
+  } catch (error) {
+    // Capturamos cualquier error en el proceso (fallo de red, geolocalización, JSON)
+    console.error("Error en el registro:", error);
+    if (error.code === error.PERMISSION_DENIED) {
+      showMessage("Permiso de geolocalización denegado. Por favor, permití el acceso a la ubicación para registrar tu asistencia.", true);
+    } else if (error.code === error.POSITION_UNAVAILABLE) {
+      showMessage("Ubicación no disponible. Asegurate de tener el GPS activado y buena señal.", true);
+    } else if (error.code === error.TIMEOUT) {
+      showMessage("Tiempo de espera agotado para obtener la ubicación. Intentá de nuevo.", true);
+    } else {
+      showMessage(`Ocurrió un error inesperado. Intentá de nuevo. (${error.message || 'Error desconocido'})`, true);
+    }
+  } finally {
+    submitButton.disabled = false; // Siempre habilitar el botón al finalizar el proceso
+  }
+});
+
+// Inicialización
+loadMembers();
+updateClock();
+setInterval(updateClock, 1000);
