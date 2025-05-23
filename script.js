@@ -40,9 +40,9 @@ const choirMembers = {
 };
 
 const locationAllowed = {
-  lat: -24.790111, // Coordenada de latitud de tu casa (aproximada)
-  lng: -65.397889, // Coordenada de longitud de tu casa (aproximada)
-  radiusMeters: 1500, // Radio en metros alrededor de tu casa (ajustable)
+  lat: -24.7864326, // Coordenada de la sala de ensayos
+  lng: -65.4084228, // Coordenada de la sala de ensayos
+  radiusMeters: 1000, // Radio en metros alrededor de tu casa (ajustable)
 };
 
 // ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
