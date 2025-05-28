@@ -47,7 +47,8 @@ const locationAllowed = {
 
 // ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
 // Asegúrate de que esta URL sea la CORRECTA y ACTUALIZADA de tu despliegue
-const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzqUQLauJqzWo6rZPEkYLpKWLWA_0EFjPAUljTPmL4aSZdk7VtBTsyP5sbfDfUcVqPG/exec';
+// Esta URL ha sido actualizada con la que proporcionaste.
+const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwW-Svoy-NtQSpPZQXIam6HjA3A7UCS44LhvI7DXnkE-2wTtb7e3_JB8jJHZBcrMeoz/exec';
 
 const form = document.getElementById("attendance-form");
 const select = document.getElementById("member-select");
