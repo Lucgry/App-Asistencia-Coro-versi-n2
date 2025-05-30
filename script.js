@@ -42,12 +42,10 @@ const choirMembers = {
 const locationAllowed = {
   lat: -24.7864326, // Coordenada de la sala de ensayos
   lng: -65.4084228, // Coordenada de la sala de ensayos
-  radiusMeters: 1000, // Radio en metros alrededor de tu casa (ajustable)
+  radiusMeters: 400, // Radio en metros alrededor de la sala de ensayos (ajustable)
 };
 
-// ** ¡TU URL DE GOOGLE APPS SCRIPT AQUÍ! **
-// Asegúrate de que esta URL sea la CORRECTA y ACTUALIZADA de tu despliegue
-// Esta URL ha sido actualizada con la que proporcionaste.
+// ** ¡URL DE GOOGLE APPS SCRIPT AQUÍ! **
 const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwW-Svoy-NtQSpPZQXIam6HjA3A7UCS44LhvI7DXnkE-2wTtb7e3_JB8jJHZBcrMeoz/exec';
 
 const form = document.getElementById("attendance-form");
