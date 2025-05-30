@@ -42,7 +42,7 @@ const choirMembers = {
 const locationAllowed = {
   lat: -24.7864326, // Coordenada de la sala de ensayos
   lng: -65.4084228, // Coordenada de la sala de ensayos
-  radiusMeters: 400, // Radio en metros alrededor de la sala de ensayos (ajustable)
+  radiusMeters: 150, // Radio en metros alrededor de la sala de ensayos (ajustable)
 };
 
 // ** ¡URL DE GOOGLE APPS SCRIPT AQUÍ! **
