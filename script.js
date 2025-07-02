@@ -34,8 +34,8 @@ const choirMembers = {
     "Goytia Abel",
     "Ibarra Wally",
     "Jardín Augusto",
+    "López Sebastián",
     "Rocha Ariel",
-    "Sebastián López",
     "Villafañe Valentín",
   ],
 };
