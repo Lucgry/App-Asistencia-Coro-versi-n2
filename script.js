@@ -7,7 +7,6 @@ const choirMembers = {
     "Ferri Mónica",
     "Gallardo Cintia",
     "Perez Gesualdo Anahi",
-    "Romina Andrea",
     "Ruiz Paola",
     "Solís Lucero",
     "Suárez Daniela",
@@ -22,7 +21,6 @@ const choirMembers = {
   ],
   Tenores: [
     "Groppa Octavio",
-    "Liendro Gabriel",
     "Otero Oscar",
     "Roldán Cristian",
     "Silva G. José",
