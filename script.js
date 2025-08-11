@@ -1,6 +1,7 @@
 // Datos de integrantes por cuerda (ordenados alfabéticamente)
 const choirMembers = {
   Sopranos: [
+    "Andrea Romina",
     "Aparicio Rocío",
     "Aramayo Valentina",
     "Evangelista Maira",
@@ -23,10 +24,8 @@ const choirMembers = {
     "Groppa Octavio",
     "Otero Oscar",
     "Roldán Cristian",
-    "Silva G. José",
     "Valdez Julio",
-    "Velárdez José",
-  ],
+    ],
   Bajos: [
     "Colqui Marcelo",
     "Goytia Abel",
