@@ -8,7 +8,6 @@ const choirMembers = {
     "Ferri Mónica",
     "Gallardo Cintia",
     "Perez Gesualdo Anahi",
-    "Ruiz Paola",
     "Solís Lucero",
     "Suárez Daniela",
   ],
