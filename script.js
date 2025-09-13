@@ -29,7 +29,6 @@ const choirMembers = {
     "Colqui Marcelo",
     "Goytia Abel",
     "Ibarra Wally",
-    "Jardín Augusto",
     "López Sebastián",
     "Rocha Ariel",
     "Villafañe Valentín",
